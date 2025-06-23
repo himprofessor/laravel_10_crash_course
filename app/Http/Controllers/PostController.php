@@ -4,8 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
-use PhpParser\Builder\Function_;
-use PhpParser\Node\Expr\FuncCall;
+use Illuminate\Support\Facades\Validator;
 
 class PostController extends Controller
 {
@@ -33,20 +32,20 @@ class PostController extends Controller
 
     public function create(Request $request)
     {
-        $post = Post::create([
-            "title" => $request->title,
-            "body" => $request->body
+        $validator = Validator::make($request->all(), [
+            'title' => 'required|string|min:2|max:255',
+            'body' => 'string'
         ]);
-        if ($post) {
-            return response()->json([
-                'message' => 'Post created successfully',
-                'data' =>  $post
-            ], 201);
+        
+        if($validator->fails()){
+           return $validator->messages();
         }
 
+        $post = Post::create($request->all());
         return response()->json([
-            'message' => "Failed to create post"
-        ], 203);
+            "message" => "Success",
+            "data" => $post
+        ]);
     }
     //
     public function index()
